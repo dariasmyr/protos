@@ -1,0 +1,130 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "sso/gen";
+
+service Auth {
+  rpc Register (RegisterRequest) returns (RegisterResponse);
+  rpc Login (LoginRequest) returns (LoginResponse);
+  rpc Logout (LogoutRequest) returns (LogoutResponse);
+  rpc ChangePassword (ChangePasswordRequest) returns (ChangePasswordResponse);
+  rpc ChangeStatus (ChangeStatusRequest) returns (ChangeStatusResponse);
+}
+
+service Sessions {
+  rpc GetActiveSessions(GetActiveUserSessionsRequest) returns (GetActiveUserSessionsResponse);
+  rpc RefreshSession(RefreshUserSessionRequest) returns (RefreshUserSessionResponse);
+  rpc ValidateSession(ValidateUserSessionRequest) returns (ValidateUserSessionResponse);
+  rpc RevokeSession(RevokeUserSessionRequest) returns (RevokeUserSessionResponse);
+}
+
+message RegisterRequest {
+  string email = 1;
+  string password = 2;
+  AccountRole role = 3;
+}
+
+message RegisterResponse {
+  int64 user_id = 1;
+}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+  int32 app_id = 3;
+}
+
+message LoginResponse {
+  int64 user_id = 1;
+  string token = 2;
+  string refresh_token = 3;
+}
+
+message LogoutRequest {
+  int64 user_id = 1;
+}
+
+message LogoutResponse {
+  bool success = 1;
+}
+
+message ChangePasswordRequest {
+  int64 user_id = 1;
+  string old_password = 2;
+  string new_password = 3;
+}
+
+message ChangePasswordResponse {
+  bool success = 1;
+}
+
+message ChangeStatusRequest {
+  int64 user_id = 1;
+  AccountStatus status = 2;
+}
+
+message ChangeStatusResponse {
+  int64 user_id = 1;
+  AccountStatus status = 2;
+}
+
+message GetActiveUserSessionsRequest {
+  int64 user_id = 1;
+}
+
+message GetActiveUserSessionsResponse {
+  repeated Session sessions = 1;
+}
+
+message RefreshUserSessionRequest {
+  int64 user_id = 1;
+  string refresh_token = 2;
+}
+
+message RefreshUserSessionResponse {
+  string token = 1;
+  string refresh_token = 2;
+  int64 expires_at = 3;
+}
+
+message ValidateUserSessionRequest {
+  string token = 1;
+}
+
+message ValidateUserSessionResponse {
+  bool valid = 1;
+  int64 expires_at = 2;
+}
+
+message RevokeUserSessionRequest {
+  string token = 1;
+}
+
+message RevokeUserSessionResponse {
+  bool success = 1;
+}
+
+message Session {
+  int64 user_id = 1;
+  string token = 2;
+  string refresh_token = 3;
+  string user_agent = 4;
+  string ip_address = 5;
+  int64 expires_at = 6;
+  int64 refresh_expires_at = 7;
+  int64 created_at = 8;
+  int64 updated_at = 9;
+  bool revoked = 10;
+}
+
+enum AccountStatus {
+  ACTIVE = 0;
+  INACTIVE = 1;
+  DELETED = 2;
+}
+
+enum AccountRole {
+  USER = 0;
+  ADMIN = 1;
+}
