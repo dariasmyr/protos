@@ -13,10 +13,10 @@ service Auth {
 }
 
 service Sessions {
-  rpc GetActiveSessions(GetActiveUserSessionsRequest) returns (GetActiveUserSessionsResponse);
-  rpc RefreshSession(RefreshUserSessionRequest) returns (RefreshUserSessionResponse);
-  rpc ValidateSession(ValidateUserSessionRequest) returns (ValidateUserSessionResponse);
-  rpc RevokeSession(RevokeUserSessionRequest) returns (RevokeUserSessionResponse);
+  rpc GetActiveSessions(GetActiveAccountSessionsRequest) returns (GetActiveAccountSessionsResponse);
+  rpc RefreshSession(RefreshAccountSessionRequest) returns (RefreshAccountSessionResponse);
+  rpc ValidateSession(ValidateAccountSessionRequest) returns (ValidateAccountSessionResponse);
+  rpc RevokeSession(RevokeAccountSessionRequest) returns (RevokeAccountSessionResponse);
 }
 
 message RegisterRequest {
@@ -69,39 +69,39 @@ message ChangeStatusResponse {
   AccountStatus status = 2;
 }
 
-message GetActiveUserSessionsRequest {
+message GetActiveAccountSessionsRequest {
   int64 account_id = 1;
 }
 
-message GetActiveUserSessionsResponse {
+message GetActiveAccountSessionsResponse {
   repeated Session sessions = 1;
 }
 
-message RefreshUserSessionRequest {
+message RefreshAccountSessionRequest {
   int64 account_id = 1;
   string refresh_token = 2;
 }
 
-message RefreshUserSessionResponse {
+message RefreshAccountSessionResponse {
   string token = 1;
   string refresh_token = 2;
   int64 expires_at = 3;
 }
 
-message ValidateUserSessionRequest {
+message ValidateAccountSessionRequest {
   string token = 1;
 }
 
-message ValidateUserSessionResponse {
+message ValidateAccountSessionResponse {
   bool valid = 1;
   int64 expires_at = 2;
 }
 
-message RevokeUserSessionRequest {
+message RevokeAccountSessionRequest {
   string token = 1;
 }
 
-message RevokeUserSessionResponse {
+message RevokeAccountSessionResponse {
   bool success = 1;
 }
 
