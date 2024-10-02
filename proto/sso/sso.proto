@@ -44,7 +44,9 @@ message RegisterResponse {
 message LoginRequest {
   string email = 1;
   string password = 2;
-  int32 app_id = 3;
+  string user_agent = 3;
+  string ip_address = 4;
+  int32 app_id = 5;
 }
 
 message LoginResponse {
