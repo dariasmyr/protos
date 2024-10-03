@@ -94,6 +94,8 @@ message GetActiveAccountSessionsResponse {
 message RefreshAccountSessionRequest {
   int64 account_id = 1;
   string refresh_token = 2;
+  string user_agent = 3;
+  string ip_address = 4;
 }
 
 message RefreshAccountSessionResponse {
