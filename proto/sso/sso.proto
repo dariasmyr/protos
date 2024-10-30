@@ -46,6 +46,7 @@ message LoginRequest {
 }
 
 message LoginResponse {
+  int64 account_id = 1;
   string token = 2;
   string refresh_token = 3;
 }
