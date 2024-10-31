@@ -8,6 +8,7 @@ package gen
 
 import (
 	context "context"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -319,9 +320,9 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SessionsClient interface {
-	GetActiveSessions(ctx context.Context, in *GetActiveAccountSessionsRequest, opts ...grpc.CallOption) (*GetActiveAccountSessionsResponse, error)
+	GetActiveSessions(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetActiveAccountSessionsResponse, error)
 	RefreshSession(ctx context.Context, in *RefreshAccountSessionRequest, opts ...grpc.CallOption) (*RefreshAccountSessionResponse, error)
-	ValidateSession(ctx context.Context, in *ValidateAccountSessionRequest, opts ...grpc.CallOption) (*ValidateAccountSessionResponse, error)
+	ValidateSession(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*ValidateAccountSessionResponse, error)
 	RevokeSession(ctx context.Context, in *RevokeAccountSessionRequest, opts ...grpc.CallOption) (*RevokeAccountSessionResponse, error)
 }
 
@@ -333,7 +334,7 @@ func NewSessionsClient(cc grpc.ClientConnInterface) SessionsClient {
 	return &sessionsClient{cc}
 }
 
-func (c *sessionsClient) GetActiveSessions(ctx context.Context, in *GetActiveAccountSessionsRequest, opts ...grpc.CallOption) (*GetActiveAccountSessionsResponse, error) {
+func (c *sessionsClient) GetActiveSessions(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetActiveAccountSessionsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetActiveAccountSessionsResponse)
 	err := c.cc.Invoke(ctx, Sessions_GetActiveSessions_FullMethodName, in, out, cOpts...)
@@ -353,7 +354,7 @@ func (c *sessionsClient) RefreshSession(ctx context.Context, in *RefreshAccountS
 	return out, nil
 }
 
-func (c *sessionsClient) ValidateSession(ctx context.Context, in *ValidateAccountSessionRequest, opts ...grpc.CallOption) (*ValidateAccountSessionResponse, error) {
+func (c *sessionsClient) ValidateSession(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*ValidateAccountSessionResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ValidateAccountSessionResponse)
 	err := c.cc.Invoke(ctx, Sessions_ValidateSession_FullMethodName, in, out, cOpts...)
@@ -377,9 +378,9 @@ func (c *sessionsClient) RevokeSession(ctx context.Context, in *RevokeAccountSes
 // All implementations should embed UnimplementedSessionsServer
 // for forward compatibility.
 type SessionsServer interface {
-	GetActiveSessions(context.Context, *GetActiveAccountSessionsRequest) (*GetActiveAccountSessionsResponse, error)
+	GetActiveSessions(context.Context, *empty.Empty) (*GetActiveAccountSessionsResponse, error)
 	RefreshSession(context.Context, *RefreshAccountSessionRequest) (*RefreshAccountSessionResponse, error)
-	ValidateSession(context.Context, *ValidateAccountSessionRequest) (*ValidateAccountSessionResponse, error)
+	ValidateSession(context.Context, *empty.Empty) (*ValidateAccountSessionResponse, error)
 	RevokeSession(context.Context, *RevokeAccountSessionRequest) (*RevokeAccountSessionResponse, error)
 }
 
@@ -390,13 +391,13 @@ type SessionsServer interface {
 // pointer dereference when methods are called.
 type UnimplementedSessionsServer struct{}
 
-func (UnimplementedSessionsServer) GetActiveSessions(context.Context, *GetActiveAccountSessionsRequest) (*GetActiveAccountSessionsResponse, error) {
+func (UnimplementedSessionsServer) GetActiveSessions(context.Context, *empty.Empty) (*GetActiveAccountSessionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetActiveSessions not implemented")
 }
 func (UnimplementedSessionsServer) RefreshSession(context.Context, *RefreshAccountSessionRequest) (*RefreshAccountSessionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RefreshSession not implemented")
 }
-func (UnimplementedSessionsServer) ValidateSession(context.Context, *ValidateAccountSessionRequest) (*ValidateAccountSessionResponse, error) {
+func (UnimplementedSessionsServer) ValidateSession(context.Context, *empty.Empty) (*ValidateAccountSessionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ValidateSession not implemented")
 }
 func (UnimplementedSessionsServer) RevokeSession(context.Context, *RevokeAccountSessionRequest) (*RevokeAccountSessionResponse, error) {
@@ -423,7 +424,7 @@ func RegisterSessionsServer(s grpc.ServiceRegistrar, srv SessionsServer) {
 }
 
 func _Sessions_GetActiveSessions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetActiveAccountSessionsRequest)
+	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -435,7 +436,7 @@ func _Sessions_GetActiveSessions_Handler(srv interface{}, ctx context.Context, d
 		FullMethod: Sessions_GetActiveSessions_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SessionsServer).GetActiveSessions(ctx, req.(*GetActiveAccountSessionsRequest))
+		return srv.(SessionsServer).GetActiveSessions(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -459,7 +460,7 @@ func _Sessions_RefreshSession_Handler(srv interface{}, ctx context.Context, dec 
 }
 
 func _Sessions_ValidateSession_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ValidateAccountSessionRequest)
+	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -471,7 +472,7 @@ func _Sessions_ValidateSession_Handler(srv interface{}, ctx context.Context, dec
 		FullMethod: Sessions_ValidateSession_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SessionsServer).ValidateSession(ctx, req.(*ValidateAccountSessionRequest))
+		return srv.(SessionsServer).ValidateSession(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
