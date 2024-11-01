@@ -16,7 +16,7 @@ service Auth {
 
 service Sessions {
   rpc GetActiveSessions(google.protobuf.Empty) returns (GetActiveAccountSessionsResponse);
-  rpc RefreshSession(RefreshAccountSessionRequest) returns (RefreshAccountSessionResponse);
+  rpc RefreshSession(google.protobuf.Empty) returns (RefreshAccountSessionResponse);
   rpc ValidateSession(google.protobuf.Empty) returns (ValidateAccountSessionResponse);
   rpc RevokeSession(RevokeAccountSessionRequest) returns (RevokeAccountSessionResponse);
 }
@@ -81,10 +81,6 @@ message ChangeStatusResponse {
 
 message GetActiveAccountSessionsResponse {
   repeated Session sessions = 1;
-}
-
-message RefreshAccountSessionRequest {
-  string refresh_token = 1;
 }
 
 message RefreshAccountSessionResponse {
