@@ -9,7 +9,7 @@ service Auth {
   rpc RegisterClient (RegisterClientRequest) returns (RegisterClientResponse);
   rpc Register (RegisterRequest) returns (RegisterResponse);
   rpc Login (LoginRequest) returns (LoginResponse);
-  rpc Logout (LogoutRequest) returns (LogoutResponse);
+  rpc Logout (google.protobuf.Empty) returns (LogoutResponse);
   rpc ChangePassword (ChangePasswordRequest) returns (ChangePasswordResponse);
   rpc ChangeStatus (ChangeStatusRequest) returns (ChangeStatusResponse);
 }
@@ -51,10 +51,6 @@ message LoginResponse {
   int64 account_id = 1;
   string token = 2;
   string refresh_token = 3;
-}
-
-message LogoutRequest {
-  int64 account_id = 1;
 }
 
 message LogoutResponse {
