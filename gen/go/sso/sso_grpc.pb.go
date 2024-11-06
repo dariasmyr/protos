@@ -8,6 +8,7 @@ package gen
 
 import (
 	context "context"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -19,6 +20,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
+	Auth_RegisterClient_FullMethodName = "/auth.Auth/RegisterClient"
 	Auth_Register_FullMethodName       = "/auth.Auth/Register"
 	Auth_Login_FullMethodName          = "/auth.Auth/Login"
 	Auth_Logout_FullMethodName         = "/auth.Auth/Logout"
@@ -30,9 +32,10 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AuthClient interface {
+	RegisterClient(ctx context.Context, in *RegisterClientRequest, opts ...grpc.CallOption) (*RegisterClientResponse, error)
 	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error)
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
-	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
+	Logout(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*LogoutResponse, error)
 	ChangePassword(ctx context.Context, in *ChangePasswordRequest, opts ...grpc.CallOption) (*ChangePasswordResponse, error)
 	ChangeStatus(ctx context.Context, in *ChangeStatusRequest, opts ...grpc.CallOption) (*ChangeStatusResponse, error)
 }
@@ -43,6 +46,16 @@ type authClient struct {
 
 func NewAuthClient(cc grpc.ClientConnInterface) AuthClient {
 	return &authClient{cc}
+}
+
+func (c *authClient) RegisterClient(ctx context.Context, in *RegisterClientRequest, opts ...grpc.CallOption) (*RegisterClientResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RegisterClientResponse)
+	err := c.cc.Invoke(ctx, Auth_RegisterClient_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *authClient) Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error) {
@@ -65,7 +78,7 @@ func (c *authClient) Login(ctx context.Context, in *LoginRequest, opts ...grpc.C
 	return out, nil
 }
 
-func (c *authClient) Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error) {
+func (c *authClient) Logout(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*LogoutResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(LogoutResponse)
 	err := c.cc.Invoke(ctx, Auth_Logout_FullMethodName, in, out, cOpts...)
@@ -99,9 +112,10 @@ func (c *authClient) ChangeStatus(ctx context.Context, in *ChangeStatusRequest, 
 // All implementations should embed UnimplementedAuthServer
 // for forward compatibility.
 type AuthServer interface {
+	RegisterClient(context.Context, *RegisterClientRequest) (*RegisterClientResponse, error)
 	Register(context.Context, *RegisterRequest) (*RegisterResponse, error)
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
-	Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)
+	Logout(context.Context, *empty.Empty) (*LogoutResponse, error)
 	ChangePassword(context.Context, *ChangePasswordRequest) (*ChangePasswordResponse, error)
 	ChangeStatus(context.Context, *ChangeStatusRequest) (*ChangeStatusResponse, error)
 }
@@ -113,13 +127,16 @@ type AuthServer interface {
 // pointer dereference when methods are called.
 type UnimplementedAuthServer struct{}
 
+func (UnimplementedAuthServer) RegisterClient(context.Context, *RegisterClientRequest) (*RegisterClientResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RegisterClient not implemented")
+}
 func (UnimplementedAuthServer) Register(context.Context, *RegisterRequest) (*RegisterResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
 }
 func (UnimplementedAuthServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
 }
-func (UnimplementedAuthServer) Logout(context.Context, *LogoutRequest) (*LogoutResponse, error) {
+func (UnimplementedAuthServer) Logout(context.Context, *empty.Empty) (*LogoutResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Logout not implemented")
 }
 func (UnimplementedAuthServer) ChangePassword(context.Context, *ChangePasswordRequest) (*ChangePasswordResponse, error) {
@@ -146,6 +163,24 @@ func RegisterAuthServer(s grpc.ServiceRegistrar, srv AuthServer) {
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&Auth_ServiceDesc, srv)
+}
+
+func _Auth_RegisterClient_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RegisterClientRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).RegisterClient(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_RegisterClient_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).RegisterClient(ctx, req.(*RegisterClientRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Auth_Register_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -185,7 +220,7 @@ func _Auth_Login_Handler(srv interface{}, ctx context.Context, dec func(interfac
 }
 
 func _Auth_Logout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(LogoutRequest)
+	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -197,7 +232,7 @@ func _Auth_Logout_Handler(srv interface{}, ctx context.Context, dec func(interfa
 		FullMethod: Auth_Logout_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServer).Logout(ctx, req.(*LogoutRequest))
+		return srv.(AuthServer).Logout(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -246,6 +281,10 @@ var Auth_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*AuthServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "RegisterClient",
+			Handler:    _Auth_RegisterClient_Handler,
+		},
+		{
 			MethodName: "Register",
 			Handler:    _Auth_Register_Handler,
 		},
@@ -281,9 +320,9 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SessionsClient interface {
-	GetActiveSessions(ctx context.Context, in *GetActiveAccountSessionsRequest, opts ...grpc.CallOption) (*GetActiveAccountSessionsResponse, error)
-	RefreshSession(ctx context.Context, in *RefreshAccountSessionRequest, opts ...grpc.CallOption) (*RefreshAccountSessionResponse, error)
-	ValidateSession(ctx context.Context, in *ValidateAccountSessionRequest, opts ...grpc.CallOption) (*ValidateAccountSessionResponse, error)
+	GetActiveSessions(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetActiveAccountSessionsResponse, error)
+	RefreshSession(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*RefreshAccountSessionResponse, error)
+	ValidateSession(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*ValidateAccountSessionResponse, error)
 	RevokeSession(ctx context.Context, in *RevokeAccountSessionRequest, opts ...grpc.CallOption) (*RevokeAccountSessionResponse, error)
 }
 
@@ -295,7 +334,7 @@ func NewSessionsClient(cc grpc.ClientConnInterface) SessionsClient {
 	return &sessionsClient{cc}
 }
 
-func (c *sessionsClient) GetActiveSessions(ctx context.Context, in *GetActiveAccountSessionsRequest, opts ...grpc.CallOption) (*GetActiveAccountSessionsResponse, error) {
+func (c *sessionsClient) GetActiveSessions(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetActiveAccountSessionsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetActiveAccountSessionsResponse)
 	err := c.cc.Invoke(ctx, Sessions_GetActiveSessions_FullMethodName, in, out, cOpts...)
@@ -305,7 +344,7 @@ func (c *sessionsClient) GetActiveSessions(ctx context.Context, in *GetActiveAcc
 	return out, nil
 }
 
-func (c *sessionsClient) RefreshSession(ctx context.Context, in *RefreshAccountSessionRequest, opts ...grpc.CallOption) (*RefreshAccountSessionResponse, error) {
+func (c *sessionsClient) RefreshSession(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*RefreshAccountSessionResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(RefreshAccountSessionResponse)
 	err := c.cc.Invoke(ctx, Sessions_RefreshSession_FullMethodName, in, out, cOpts...)
@@ -315,7 +354,7 @@ func (c *sessionsClient) RefreshSession(ctx context.Context, in *RefreshAccountS
 	return out, nil
 }
 
-func (c *sessionsClient) ValidateSession(ctx context.Context, in *ValidateAccountSessionRequest, opts ...grpc.CallOption) (*ValidateAccountSessionResponse, error) {
+func (c *sessionsClient) ValidateSession(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*ValidateAccountSessionResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ValidateAccountSessionResponse)
 	err := c.cc.Invoke(ctx, Sessions_ValidateSession_FullMethodName, in, out, cOpts...)
@@ -339,9 +378,9 @@ func (c *sessionsClient) RevokeSession(ctx context.Context, in *RevokeAccountSes
 // All implementations should embed UnimplementedSessionsServer
 // for forward compatibility.
 type SessionsServer interface {
-	GetActiveSessions(context.Context, *GetActiveAccountSessionsRequest) (*GetActiveAccountSessionsResponse, error)
-	RefreshSession(context.Context, *RefreshAccountSessionRequest) (*RefreshAccountSessionResponse, error)
-	ValidateSession(context.Context, *ValidateAccountSessionRequest) (*ValidateAccountSessionResponse, error)
+	GetActiveSessions(context.Context, *empty.Empty) (*GetActiveAccountSessionsResponse, error)
+	RefreshSession(context.Context, *empty.Empty) (*RefreshAccountSessionResponse, error)
+	ValidateSession(context.Context, *empty.Empty) (*ValidateAccountSessionResponse, error)
 	RevokeSession(context.Context, *RevokeAccountSessionRequest) (*RevokeAccountSessionResponse, error)
 }
 
@@ -352,13 +391,13 @@ type SessionsServer interface {
 // pointer dereference when methods are called.
 type UnimplementedSessionsServer struct{}
 
-func (UnimplementedSessionsServer) GetActiveSessions(context.Context, *GetActiveAccountSessionsRequest) (*GetActiveAccountSessionsResponse, error) {
+func (UnimplementedSessionsServer) GetActiveSessions(context.Context, *empty.Empty) (*GetActiveAccountSessionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetActiveSessions not implemented")
 }
-func (UnimplementedSessionsServer) RefreshSession(context.Context, *RefreshAccountSessionRequest) (*RefreshAccountSessionResponse, error) {
+func (UnimplementedSessionsServer) RefreshSession(context.Context, *empty.Empty) (*RefreshAccountSessionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RefreshSession not implemented")
 }
-func (UnimplementedSessionsServer) ValidateSession(context.Context, *ValidateAccountSessionRequest) (*ValidateAccountSessionResponse, error) {
+func (UnimplementedSessionsServer) ValidateSession(context.Context, *empty.Empty) (*ValidateAccountSessionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ValidateSession not implemented")
 }
 func (UnimplementedSessionsServer) RevokeSession(context.Context, *RevokeAccountSessionRequest) (*RevokeAccountSessionResponse, error) {
@@ -385,7 +424,7 @@ func RegisterSessionsServer(s grpc.ServiceRegistrar, srv SessionsServer) {
 }
 
 func _Sessions_GetActiveSessions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetActiveAccountSessionsRequest)
+	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -397,13 +436,13 @@ func _Sessions_GetActiveSessions_Handler(srv interface{}, ctx context.Context, d
 		FullMethod: Sessions_GetActiveSessions_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SessionsServer).GetActiveSessions(ctx, req.(*GetActiveAccountSessionsRequest))
+		return srv.(SessionsServer).GetActiveSessions(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Sessions_RefreshSession_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RefreshAccountSessionRequest)
+	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -415,13 +454,13 @@ func _Sessions_RefreshSession_Handler(srv interface{}, ctx context.Context, dec 
 		FullMethod: Sessions_RefreshSession_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SessionsServer).RefreshSession(ctx, req.(*RefreshAccountSessionRequest))
+		return srv.(SessionsServer).RefreshSession(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Sessions_ValidateSession_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ValidateAccountSessionRequest)
+	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -433,7 +472,7 @@ func _Sessions_ValidateSession_Handler(srv interface{}, ctx context.Context, dec
 		FullMethod: Sessions_ValidateSession_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SessionsServer).ValidateSession(ctx, req.(*ValidateAccountSessionRequest))
+		return srv.(SessionsServer).ValidateSession(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }

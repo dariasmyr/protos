@@ -1,29 +1,41 @@
 syntax = "proto3";
+import "google/protobuf/empty.proto";
 
 package auth;
 
 option go_package = "sso/gen";
 
 service Auth {
+  rpc RegisterClient (RegisterClientRequest) returns (RegisterClientResponse);
   rpc Register (RegisterRequest) returns (RegisterResponse);
   rpc Login (LoginRequest) returns (LoginResponse);
-  rpc Logout (LogoutRequest) returns (LogoutResponse);
+  rpc Logout (google.protobuf.Empty) returns (LogoutResponse);
   rpc ChangePassword (ChangePasswordRequest) returns (ChangePasswordResponse);
   rpc ChangeStatus (ChangeStatusRequest) returns (ChangeStatusResponse);
 }
 
 service Sessions {
-  rpc GetActiveSessions(GetActiveAccountSessionsRequest) returns (GetActiveAccountSessionsResponse);
-  rpc RefreshSession(RefreshAccountSessionRequest) returns (RefreshAccountSessionResponse);
-  rpc ValidateSession(ValidateAccountSessionRequest) returns (ValidateAccountSessionResponse);
+  rpc GetActiveSessions(google.protobuf.Empty) returns (GetActiveAccountSessionsResponse);
+  rpc RefreshSession(google.protobuf.Empty) returns (RefreshAccountSessionResponse);
+  rpc ValidateSession(google.protobuf.Empty) returns (ValidateAccountSessionResponse);
   rpc RevokeSession(RevokeAccountSessionRequest) returns (RevokeAccountSessionResponse);
 }
 
+message RegisterClientRequest {
+  string app_name = 1;
+  string secret = 2;
+  string redirect_url = 3;
+}
+
+message RegisterClientResponse {
+  int64 app_id = 1;
+}
+
 message RegisterRequest {
-  string email = 1;
-  string password = 2;
-  AccountRole role = 3;
-  int32 app_id = 4;
+  int64 app_id = 1;
+  string email = 2;
+  string password = 3;
+  AccountRole role = 4;
 }
 
 message RegisterResponse {
@@ -33,7 +45,6 @@ message RegisterResponse {
 message LoginRequest {
   string email = 1;
   string password = 2;
-  int32 app_id = 3;
 }
 
 message LoginResponse {
@@ -42,18 +53,13 @@ message LoginResponse {
   string refresh_token = 3;
 }
 
-message LogoutRequest {
-  int64 account_id = 1;
-}
-
 message LogoutResponse {
   bool success = 1;
 }
 
 message ChangePasswordRequest {
-  int64 account_id = 1;
-  string old_password = 2;
-  string new_password = 3;
+  string old_password = 1;
+  string new_password = 2;
 }
 
 message ChangePasswordResponse {
@@ -70,17 +76,8 @@ message ChangeStatusResponse {
   AccountStatus status = 2;
 }
 
-message GetActiveAccountSessionsRequest {
-  int64 account_id = 1;
-}
-
 message GetActiveAccountSessionsResponse {
   repeated Session sessions = 1;
-}
-
-message RefreshAccountSessionRequest {
-  int64 account_id = 1;
-  string refresh_token = 2;
 }
 
 message RefreshAccountSessionResponse {
@@ -89,13 +86,8 @@ message RefreshAccountSessionResponse {
   int64 expires_at = 3;
 }
 
-message ValidateAccountSessionRequest {
-  string token = 1;
-}
-
 message ValidateAccountSessionResponse {
   bool valid = 1;
-  int64 expires_at = 2;
 }
 
 message RevokeAccountSessionRequest {
@@ -103,7 +95,8 @@ message RevokeAccountSessionRequest {
 }
 
 message RevokeAccountSessionResponse {
-  bool success = 1;
+  bool token = 1;
+  bool revoked = 2;
 }
 
 message Session {
